@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"C:\\\\Users\\\\Jake Meyer\\\\OneDrive - Southern Methodist University\\\\Attachments\\\\Desktop\\\\SyllaBros Claude\"; npm run build 2>&1)",
+      "WebSearch",
+      "WebFetch(domain:neon.tech)"
+    ]
+  }
+}

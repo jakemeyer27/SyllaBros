@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy:         #083152;
+  --color-crimson:      #C4202A;
+  --color-brand-orange: #F47920;
+  --color-amber-warm:   #FBBA3C;
+  --color-cream:        #EDE8D0;
+}
+
+/* ── Global feel ──────────────────────────────────────────────────────────── */
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle dot-grid background on the app shell */
+.bg-app {
+  background-color: #f4f5f7;
+  background-image: radial-gradient(circle, #d1d5db 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Cards lift on hover */
+.card-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
+}
+
+/* Smooth focus rings */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(8, 49, 82, 0.15);
+}
