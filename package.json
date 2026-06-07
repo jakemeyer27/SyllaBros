@@ -7,7 +7,7 @@
     "dev": "concurrently -n api,web -c cyan,magenta \"npm run server\" \"vite\"",
     "server": "tsx watch --env-file=.env.local server/index.ts",
     "start": "tsx server/index.ts",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
