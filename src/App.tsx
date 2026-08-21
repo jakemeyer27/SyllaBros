@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LayoutDashboard, BookOpen, ClipboardList, BarChart2, GraduationCap, LogOut, Loader2, Settings2, HelpCircle, Flame, Brain, Bell, BellOff, X, CalendarDays } from 'lucide-react';
 import { useNotifications, requestNotificationPermission, getNotificationPermission } from './hooks/useNotifications';
-import { authClient, getJWTToken } from './auth';
+import { getSession, signIn, signUp, clearAuth, getJWTToken } from './auth';
+import type { SessionUser } from './auth';
 import { useAppState } from './store';
 import Dashboard from './components/Dashboard';
 import Courses from './components/Courses';
@@ -27,11 +28,6 @@ const TERM_KEY  = 'syllabros_term_type';
 
 type Tab = 'dashboard' | 'study-plan' | 'courses' | 'assignments' | 'calendar' | 'schedule' | 'grades' | 'help';
 
-interface SessionUser {
-  id: string;
-  name: string;
-  email: string;
-}
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'dashboard',   label: 'Dashboard',    icon: <LayoutDashboard size={18} /> },
@@ -49,10 +45,8 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
-    authClient.getSession().then(({ data }) => {
-      setUser((data?.user as SessionUser) ?? null);
-      setAuthLoading(false);
-    }).catch(() => setAuthLoading(false));
+    getSession().then(user => { setUser(user); setAuthLoading(false); })
+      .catch(() => setAuthLoading(false));
   }, []);
 
   if (authLoading) {
@@ -290,7 +284,7 @@ function AuthedApp({ user, onSignOut }: { user: SessionUser; onSignOut: () => vo
   });
 
   async function handleSignOut() {
-    await authClient.signOut();
+    clearAuth();
     onSignOut();
   }
 
@@ -589,15 +583,10 @@ function SignInPage({ onSignedIn }: { onSignedIn: (user: SessionUser) => void })
     setLoading(true);
     setError('');
     try {
-      if (mode === 'signin') {
-        const res = await authClient.signIn.email({ email, password });
-        if (res.error) { setError(res.error.message ?? 'Sign in failed'); return; }
-        if (res.data?.user) onSignedIn(res.data.user as SessionUser);
-      } else {
-        const res = await authClient.signUp.email({ email, password, name });
-        if (res.error) { setError(res.error.message ?? 'Sign up failed'); return; }
-        if (res.data?.user) onSignedIn(res.data.user as SessionUser);
-      }
+      const user = mode === 'signin'
+        ? await signIn(email, password)
+        : await signUp(name, email, password);
+      onSignedIn(user);
     } catch (e) {
       setError(String(e));
     } finally {
