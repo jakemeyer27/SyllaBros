@@ -2,7 +2,9 @@ import type { Request, Response, NextFunction } from 'express';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import 'dotenv/config';
 
-const NEON_AUTH_URL = process.env.VITE_NEON_AUTH_URL;
+// NEON_AUTH_URL_INTERNAL is the real Neon endpoint (set in production so the proxy
+// doesn't loop back to itself). Falls back to VITE_NEON_AUTH_URL for local dev.
+const NEON_AUTH_URL = process.env.NEON_AUTH_URL_INTERNAL ?? process.env.VITE_NEON_AUTH_URL;
 if (!NEON_AUTH_URL) throw new Error('VITE_NEON_AUTH_URL must be set in .env.local');
 
 // Neon Auth exposes its public keys at /.well-known/jwks.json

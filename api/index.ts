@@ -12,6 +12,34 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// Proxy auth calls to the real Neon Auth server (avoids browser "Invalid origin" CORS error)
+const NEON_AUTH_INTERNAL = process.env.NEON_AUTH_URL_INTERNAL ?? process.env.VITE_NEON_AUTH_URL;
+if (NEON_AUTH_INTERNAL) {
+  app.all('/api/neon-auth/*', async (req, res) => {
+    try {
+      const subpath = req.path.replace(/^\/api\/neon-auth/, '');
+      const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+      const target = `${NEON_AUTH_INTERNAL}${subpath}${qs}`;
+      const headers: Record<string, string> = {};
+      for (const [k, v] of Object.entries(req.headers)) {
+        if (k === 'host') continue;
+        headers[k] = Array.isArray(v) ? v.join(', ') : (v ?? '');
+      }
+      const fetchRes = await fetch(target, {
+        method: req.method,
+        headers,
+        body: ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
+      });
+      fetchRes.headers.forEach((v, k) => {
+        if (k.toLowerCase() !== 'content-encoding') res.setHeader(k, v);
+      });
+      res.status(fetchRes.status).send(await fetchRes.text());
+    } catch (e) {
+      res.status(502).json({ error: 'Auth proxy error', detail: String(e) });
+    }
+  });
+}
 app.use('/api', requireAuth, parseRoutes);
 app.use('/api', requireAuth, canvasRoutes);
 app.use('/api', requireAuth, studyCoachRoutes);

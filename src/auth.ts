@@ -1,5 +1,7 @@
 import { createInternalNeonAuth } from '@neondatabase/auth';
 
+// In production VITE_NEON_AUTH_URL points to our own /api/neon-auth proxy so the
+// browser never hits the Neon Auth server directly (avoids "Invalid origin").
 const url = import.meta.env.VITE_NEON_AUTH_URL as string;
 
 if (!url) {
