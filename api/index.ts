@@ -16,7 +16,7 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 // Proxy auth calls to the real Neon Auth server (avoids browser "Invalid origin" CORS error)
 const NEON_AUTH_INTERNAL = process.env.NEON_AUTH_URL_INTERNAL ?? process.env.VITE_NEON_AUTH_URL;
 if (NEON_AUTH_INTERNAL) {
-  app.all('/api/neon-auth/*', async (req, res) => {
+  app.all(/^\/api\/neon-auth/, async (req, res) => {
     try {
       const subpath = req.path.replace(/^\/api\/neon-auth/, '');
       const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
