@@ -21,9 +21,10 @@ if (NEON_AUTH_INTERNAL) {
       const subpath = req.path.replace(/^\/api\/neon-auth/, '');
       const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
       const target = `${NEON_AUTH_INTERNAL}${subpath}${qs}`;
+      const STRIP = new Set(['host', 'origin', 'referer', 'x-forwarded-for', 'x-forwarded-host']);
       const headers: Record<string, string> = {};
       for (const [k, v] of Object.entries(req.headers)) {
-        if (k === 'host') continue;
+        if (STRIP.has(k.toLowerCase())) continue;
         headers[k] = Array.isArray(v) ? v.join(', ') : (v ?? '');
       }
       const fetchRes = await fetch(target, {
